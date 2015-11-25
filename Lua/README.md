@@ -1,0 +1,1 @@
+StrictClass - Classes in Lua that also provides the option for maintaining table syntax for selected fields (similar to C#'s properties)
