@@ -1,0 +1,1 @@
+SmallType - A small metaprogram that results to the smallest type that can hold a value of the given size
