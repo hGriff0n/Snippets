@@ -48,7 +48,7 @@ struct is_callable {
 		using Yes = char;
 		using No = long;
 
-		template <typename T> static constexpr Yes is(decltype(&T::operator()));
+		template <typename T> static constexpr Yes is(decltype(&std::decay_t<T>::operator()));
 		template <typename T> static constexpr No is(...);
 
 	public:
