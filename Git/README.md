@@ -1,0 +1,2 @@
+pre-commit.spero - a basic git hook script that was developed for automating some processes at commit time in the speroc project
+assemble_readme.rb - a simple script that constructs a readme file by crawling through the project
