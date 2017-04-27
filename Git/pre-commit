@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# Setup constants for calling ruby
+RUBY=/c/Ruby23-64/bin/ruby.exe
+GIT_HOOKS=./.git/hooks
+
+# Check the commit body for various "triggers" (ie. figure out what to do)
+
+
+# Update the readme file for versioning (TODO: Add in triggers)
+    # Update if "_readme.md" changes
+    # Update if any source files change
+    # Update if forced by commit message
+RUBY $GIT_HOOKS/assemble_readme.rb
+git add "README.md"
+
+# Triggers (If any source files are changed, not including comments, not including testing framework)
+#       What if the comments are documenting a change in interface
+#   Major - Updated by hand (should be a big enough event that I remember)
+#   Minor - [Feat] in commit header ???
+#       Medium-Large numbers of changed lines
+#   Patch - [Fix] in commit header ???
+#       Small numbers of changed lines
+
+# I kinda want to force something within every commit (so I don't forget anything)
+
+# Collect data about the git files (what's being committed, etc.)
+mapfile -t staged < <(git diff --cached --name-only)                    # All staged files
+mapfile -t tracked < <(git diff --name-only)                            # All tracked but unstaged files
+mapfile -t untracked < <(git ls-files --other --exclude-standard)       # All untracked and unstaged files
+
+echo ${staged[*]}
+echo ${tracked[*]}
+echo ${untracked[*]}
+
+# $? - to get the return value of the last run command
+
+exit 1
