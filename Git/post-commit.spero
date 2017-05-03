@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Define various functions
+contains_match() {    # array, regex <- test whether the regex matches an element in the array
+    local -a search=("${!1}")
+    for e in ${search[@]}; do [[ $e =~ $2 ]] && return 0; done
+    return 1
+}
+
+# Collect data about the git files (what's being committed, etc.) into an array
+mapfile -t staged < <(git diff --cached --name-only)                    # All staged files
+
+# If the README file was modified, amend the previous comit to include it
+    # Note: This does something wacky with GitKraken
+contains_match staged[@] "README.md"
+if [ $? ]; then
+    git commit --amend --no-verify
+fi
+
+# exit 1

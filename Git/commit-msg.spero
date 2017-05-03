@@ -4,6 +4,16 @@
 RUBY=/c/Ruby23-64/bin/ruby.exe
 GitDIR=./.git/hooks
 
+# Define various functions
+contains_match() {    # array, regex <- test whether the regex matches an element in the array
+    local -a search=("${!1}")
+    for e in ${search[@]}; do [[ $e =~ $2 ]] && return 0; done
+    return 1
+}
+# test if a C++ source file is staged: contains staged[@] \.cpp$
+# test if "_todo.txt" is tracked: contains tracked[@] "_todo.txt"
+
+
 # Collect information about the commit context
 
 # Collect data about the git files (what's being committed, etc.) into an array
@@ -11,20 +21,37 @@ mapfile -t staged < <(git diff --cached --name-only)                    # All st
 mapfile -t tracked < <(git diff --name-only)                            # All tracked but unstaged files
 mapfile -t untracked < <(git ls-files --other --exclude-standard)       # All untracked and unstaged files
 
-# Search for information within the git message ($1 - file of commit message)
+# Collect the contents of the commit message
+mapfile -t message < $1
+
+# WTF is going on here
+# if [[ "[" =~ \[ ]]
+#     echo "No bug"
+# else
+#     echo "Bug"
+# fi
 
 
+# Get relevant data from the collected data
+contains_match staged[@] "(_readme.md)|\.(cpp)|h|(rb)$"
+update_readme=$?
+ver_update=$(contains_match message[@] ^.Major] && echo 1 \
+         || (contains_match message[@] ^.Minor] && echo 2 \
+         || (contains_match message[@] ^.Patch] && echo 3 \
+         || (contains_match message[@] "^.(Fix)|(Doc)|(Inter(face)?)]" && echo 3 || echo 4))))
+        #  || (contains_match message[@] ^.*] && echo 4 || echo 5))))
 
-# Check the commit body for various "triggers" (ie. figure out what to do)
-
+# Force a bracketed word to be included in the message
+((ver_update == 4)) && echo "Commit must have a Major|Minor|Patch|Fix|Doc|Inter|Interface keyword inside of brackets at the front!" && exit 1
+# TODO: Check whether there's some additional triggers in the commit message
 
 
 # Update the readme file for versioning (TODO: Add in triggers)
-    # Update if "_readme.md" changes
-    # Update if any source files change
-    # Update if forced by commit message
-RUBY $GitDIR/assemble_readme.rb
+    # _readme.md, *.cpp, *.h, *.rb \in staged
+    # versioning changes indicated by commit message
+RUBY $GitDIR/assemble_readme.rb $update_readme $ver_update
 git add "README.md"
+
 
 # Triggers (If any source files are changed, not including comments, not including testing framework)
 #       What if the comments are documenting a change in interface
@@ -39,5 +66,8 @@ git add "README.md"
 
 
 # $? - to get the return value of the last run command
+
+# Echo added because this script was failing weirdly without it
+echo Commit-msg hook completed successfully
 
 exit 1

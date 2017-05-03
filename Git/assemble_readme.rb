@@ -2,18 +2,28 @@
 # The primary purpose of this script is to automate the process of updating semantic versioning
 # However, this can also be extended in the future to perform various tasks
 
-require_relative '../Ruby/utils'
+require_relative 'utils'
+require 'yaml'
 
-# TODO: Add in argument hooks to have more fine grain control over the generation
+# puts ARGV.inspect
+
+yaml_file = "#{Dir.pwd}/.git/hooks/version.yaml"
+ver = YAML.load_file(yaml_file)
 File.open(Dir.pwd + "/README.md", "w") do |readme|
-    # Semantic versioning (TODO: Figure out a way to "save" this)
-    major = 0       # Updated by hand
-    minor = 1
-    patch = 0
-    readme.puts "speroc ver #{major}.#{minor}.#{patch} - The reference compiler for the spero language"
+    # Semantic versioning (TODO: Determine what needs updating)
+    case ARGV[1]
+        when "1"
+            ver['major'] += 1
+        when "2"
+            ver['minor'] += 1
+        else
+            ver['patch'] += 1
+    end
+    readme.puts "speroc ver #{ver['major']}.#{ver['minor']}.#{ver['patch']} - The reference compiler for the spero language"
 
 
-    # Information about files in the project (TODO: See if I can add in more stats)
+    # Information about files in the project
+        # NOTE: This isn't going to be accurate if source files are changed but not added to the commit
     stats = SourceStats.new(["incl", "src", "main.cpp", "test.rb"])
     num_lines = stats.exts.reduce(0) do |acc, elem|
         acc + elem[1][:sloc]
@@ -28,7 +38,11 @@ File.open(Dir.pwd + "/README.md", "w") do |readme|
 
 
     # Move over the custom readme information into the public readme
+    readme.puts ""
     File.open(Dir.pwd + "/_readme.md", "r").each_line do |line|
         readme.puts line
     end
-end
+end if ARGV[0] == "0"
+
+# TODO: Look at adding more stats to the SourceStats resolver class (in utils.rb)
+File.open(yaml_file, 'w') {|f| f.write ver.to_yaml }
