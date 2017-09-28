@@ -1,0 +1,13 @@
+[package]
+name = "rest"
+version = "0.1.0"
+authors = ["hGriff0n <ghooper96@gmail.com>"]
+
+[dependencies]
+nickel = "*"
+chashmap = "*"
+syncbox = "*"
+serde = "*"
+serde_derive = "*"
+ctrlc = "*"
+bincode = "*"
